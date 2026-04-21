@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UniPay OTP Verification</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #f5f9ff, #e6f0ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .otp-container {
+            background-color: #ffffff;
+            width: 360px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .main-heading {
+            text-align: center;
+            color: #0a2a66; /* dark blue */
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .otp-container h2 {
+            text-align: center;
+            color: #1f4fd8; /* blue */
+            margin-bottom: 25px;
+            font-size: 18px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #1f4fd8;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #b3c6ff;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        .input-group input:focus {
+            border-color: #1f4fd8;
+        }
+
+        .verify-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #0a2a66;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .verify-btn:hover {
+            background-color: #143c8a;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .links a {
+            color: #1f4fd8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="otp-container">
+        <div class="main-heading">Welcome to UniPay</div>
+        <h2>OTP Verification</h2>
+
+        {% if message %}
+            <div class="message">{{ message }}</div>
+        {% endif %}
+
+        <form method="POST">
+
+            <div class="input-group">
+                <label for="otp">Enter OTP</label>
+                <input type="text" id="otp" name="otp" placeholder="******" required pattern="[0-9]{6}" maxlength="6">
+            </div>
+
+            <button type="submit" class="verify-btn">Verify OTP</button>
+        </form>
+
+        {% if otp_expired %}
+        <form method="POST" action="/resend-email-otp">
+            <button type="submit" class="verify-btn" style="background:#1f4fd8;">
+            Resend OTP
+            </button>
+        </form>
+        {% else %}
+<p id="timer" style="text-align:center;color:#1f4fd8;">
+    OTP expires in <span id="time">{{ remaining_seconds| default(0) }}</span>s
+</p>
+{% endif %}
+
+
+
+        <div class="footer-text">
+            Secure Verification with UniPay
+        </div>
+    </div>
+
+
+
+<script>
+    let timeLeft = {{ remaining_seconds|int }};
+
+    if (timeLeft > 0) {
+        const timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById("time").innerText = timeLeft;
+
+            
+        }, 1000);
+    }
+</script>
+
+
+
+
+
+</body>
+</html>

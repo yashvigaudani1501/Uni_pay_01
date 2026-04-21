@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login OTP</title>
+</head>
+<body style="font-family:Arial; background:#f5f9ff;">
+
+<div style="
+    width:320px;
+    margin:100px auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    text-align:center;
+">
+    <h2>Verify Login</h2>
+
+    {% if message %}
+    <p style="color:red;">{{ message }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <input type="text" name="otp" placeholder="Enter OTP"
+               style="width:100%;padding:10px;margin:10px 0;" required>
+
+        <button type="submit" style="
+            width:100%;
+            padding:10px;
+            background:#0a2a66;
+            color:white;
+            border:none;
+            border-radius:5px;
+        ">
+            Verify OTP
+        </button>
+    </form>
+
+    <p style="font-size:13px;color:#555;margin-top:10px;">
+    OTP expires in <span id="timer">{{ remaining_seconds }}</span> seconds
+</p>
+
+</div>
+
+<script>
+    let timeLeft = {{ remaining_seconds|int }};
+
+    const timerEl = document.getElementById("timer");
+
+    if (timeLeft > 0) {
+        const countdown = setInterval(() => {
+            timeLeft--;
+
+            if (timerEl) {
+                timerEl.textContent = timeLeft;
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                // auto-refresh when expired to force re-login
+                window.location.href = "/login";
+            }
+        }, 1000);
+    }
+</script>
+
+
+</body>
+</html>

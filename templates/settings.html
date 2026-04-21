@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings • UniPay Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1d2671, #c33764);
+            color: #333;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(6px);
+        }
+
+        .navbar h2 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .nav-btn {
+            background: #fff;
+            color: #1d2671;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .nav-btn:hover {
+            background: #eee;
+        }
+
+        /* CONTAINER */
+        .container {
+            padding: 30px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* SETTINGS CARD */
+        .settings-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 25px;
+        }
+
+        .settings-card h3 {
+            margin-top: 0;
+            color: #1d2671;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            outline: none;
+        }
+
+        .form-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        /* TOGGLE */
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* SAVE BUTTON */
+        .save-btn {
+            background: #1d2671;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .save-btn:hover {
+            background: #16205b;
+        }
+
+        /* DANGER ZONE */
+        .danger-zone {
+            border: 2px solid #dc3545;
+        }
+
+        .danger-zone h3 {
+            color: #dc3545;
+        }
+
+        .danger-btn {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .danger-btn:hover {
+            background: #b02a37;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #eee;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Admin Settings</h2>
+    <div>
+        <button class="nav-btn" onclick="history.back()">← Back</button>
+        <button class="nav-btn" onclick="goBack()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- GENERAL SETTINGS -->
+    <div class="settings-card">
+        <h3>General Settings</h3>
+
+        <div class="form-group">
+            <label>Application Name</label>
+            <input type="text" value="UniPay">
+        </div>
+
+        <div class="form-group">
+            <label>Default Currency</label>
+            <select>
+                <option>INR (₹)</option>
+                <option>USD ($)</option>
+                <option>EUR (€)</option>
+            </select>
+        </div>
+
+        <div class="form-group toggle">
+            <input type="checkbox" checked>
+            <label>Enable New User Registrations</label>
+        </div>
+
+        <button class="save-btn">Save Changes</button>
+    </div>
+
+    <!-- SECURITY SETTINGS -->
+    <div class="settings-card">
+        <h3>Security Settings</h3>
+
+        <div class="form-group toggle">
+            <input type="checkbox" checked>
+            <label>Enable Two-Factor Authentication (Admin)</label>
+        </div>
+
+        <div class="form-group toggle">
+            <input type="checkbox" checked>
+            <label>Log Failed Login Attempts</label>
+        </div>
+
+        <div class="form-group">
+            <label>Session Timeout (minutes)</label>
+            <input type="number" value="15">
+        </div>
+
+        <button class="save-btn">Update Security</button>
+    </div>
+
+    <!-- PAYMENT SETTINGS -->
+    <div class="settings-card">
+        <h3>Payment Settings</h3>
+
+        <div class="form-group">
+            <label>Minimum Transaction Amount (₹)</label>
+            <input type="number" value="10">
+        </div>
+
+        <div class="form-group">
+            <label>Maximum Transaction Amount (₹)</label>
+            <input type="number" value="100000">
+        </div>
+
+        <div class="form-group toggle">
+            <input type="checkbox" checked>
+            <label>Enable UPI Payments</label>
+        </div>
+
+        <button class="save-btn">Save Payment Settings</button>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="settings-card danger-zone">
+        <h3>Danger Zone</h3>
+
+        <p style="font-size:14px; color:#555;">
+            These actions are irreversible. Proceed with caution.
+        </p>
+
+        <button class="danger-btn" onclick="resetSystem()">Reset System Data</button>
+    </div>
+
+</div>
+
+<div class="footer">
+    UniPay Admin Panel • Settings
+</div>
+
+<script>
+function confirmLogout() {
+    if (confirm("Are you sure you want to logout?")) {
+        window.location.href = "/logout";
+    }
+}
+
+function resetSystem() {
+    if (confirm("This will reset critical system data. Are you absolutely sure?")) {
+        alert("System reset triggered (UI only).");
+    }
+}
+function goBack() {
+    window.location.href = "/admin/dashboard";
+}
+</script>
+
+</body>
+</html>

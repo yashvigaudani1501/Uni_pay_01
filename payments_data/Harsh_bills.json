@@ -1,0 +1,22 @@
+[
+  {
+    "id": "BILL4918E7224C",
+    "date": "2026-02-19 22:49:39",
+    "category": "Internet",
+    "provider": "Jio Fiber",
+    "customer_name": "harsh",
+    "amount": 1322.0,
+    "bill_period": "Feb 2026",
+    "status": "success"
+  },
+  {
+    "id": "BILLE4329BF407",
+    "date": "2026-02-19 23:11:44",
+    "category": "Water",
+    "provider": "NJ Water Supply",
+    "customer_name": "Devansh",
+    "amount": 263.0,
+    "bill_period": "Feb 2026",
+    "status": "success"
+  }
+]

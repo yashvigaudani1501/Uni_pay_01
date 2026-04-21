@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UniPay Login</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #e7f1ff, #e6f0ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            width: 360px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-container h2 {
+            text-align: center;
+            color: #0a2a66;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #1f4fd8;
+            font-weight: bold;
+            
+        }
+
+        .input-group input {
+            width: 335px;
+            margin: 0 auto;
+            padding: 10px;
+            border: 1px solid #b3c6ff;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            border-color: #1f4fd8;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #0a2a66;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: #143c8a;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .links a {
+            color: #1f4fd8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>UniPay Login</h2>
+
+        {% if lock_remaining %}
+<p style="color:red;text-align:center;">
+    🔒 Account locked.
+    Try again in
+    <strong><span id="lockTimer"></span></strong>
+</p>
+{% endif %}
+
+
+        <form method="POST">
+            {% if message %}
+<p style="color:red; text-align:center; margin-bottom:10px;">
+    {{ message }}
+</p>
+{% endif %}
+
+            <input type="hidden" name="login_type" value="user">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input placeholder="Enter Username" type="text" id="username" name="username" minlength="5" maxlength="20" required {% if session.get("otp_sent") %}readonly{% endif %}
+                value="{{ request.form.username or '' }}"
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required {% if session.get("otp_sent") %}disabled{% endif %} placeholder="Enter Password">
+            </div>
+
+           {% if session.get("otp_sent") %}
+            <div class="input-group">
+                <label>OTP</label>
+                <input type="text" name="otp" required id="otp-input" {% if session.get("otp_sent") %}required{% endif %}>
+            </div>
+            {% endif %}
+
+
+            {% if not session.get("otp_sent") %}
+            <button type="submit" name="action" value="verify" class="login-btn">
+            Verify Account
+            </button>
+            {% else %}
+            <button type="submit" name="action" value="login" class="login-btn" id="login-btn" disabled>
+            Login
+            </button>
+            {% endif %}
+
+
+            <button
+            type="submit"
+            name="action"
+            value="resend"
+            id="resend-btn"
+            style="display:none; margin-top:10px;"
+            formnovalidate
+            >
+            Resend OTP
+            </button>
+
+
+            {% if session.get("otp_sent") and not otp_expired %}
+            <p id="countdown" style="text-align:center;color:#1f4fd8;">
+            OTP expires in <span id="time">{{ remaining_seconds | default(0) }}</span>s
+            </p>
+            {% endif %}
+
+        </form>
+
+        
+
+        <div class="links">
+            Don’t have an account?
+            <a href="/register">Register</a>
+        </div>
+
+        <div class="footer-text">
+            Secure Digital Payments with UniPay
+        </div>
+    </div>
+
+
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+        let timeLeft = Number("{{ remaining_seconds if remaining_seconds is defined else 0 }}");
+
+        const resendBtn = document.getElementById("resend-btn");
+        const countdownEl = document.getElementById("countdown");
+        const timeSpan = document.getElementById("time");
+
+        if (timeLeft > 0) {
+            const timer = setInterval(() => {
+                timeLeft--;
+
+                if (timeSpan) {
+                    timeSpan.innerText = timeLeft;
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+
+                    if (countdownEl) {
+                        countdownEl.style.display = "none";
+                    }
+
+                    if (resendBtn) {
+                        resendBtn.style.display = "block";
+                    }
+                }
+            }, 1000);
+        }
+
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const otpInput = document.getElementById("otp-input");
+        const loginBtn = document.getElementById("login-btn");
+
+        if (otpInput && loginBtn) {
+            otpInput.addEventListener("input", () => {
+                if (otpInput.value.trim().length > 0) {
+                    loginBtn.disabled = false;
+                } else {
+                    loginBtn.disabled = true;
+                }
+            });
+        }
+    });
+</script>
+
+
+{% if show_verify_popup %}
+<div id="verifyModal" style="
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.4);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+">
+    <div style="
+        background:white;
+        padding:25px;
+        border-radius:10px;
+        width:320px;
+        text-align:center;
+    ">
+        <h3 style="color:#0a2a66;">Email Not Verified</h3>
+        <p style="font-size:14px; color:#555;">
+            Please verify your email to continue.
+        </p>
+
+        <form method="POST" action="/verify-email-from-login">
+    <button type="submit" style="
+        background:#0a2a66;
+        color:white;
+        padding:10px 15px;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+    ">
+        Verify Email
+    </button>
+</form>
+
+
+
+        <br>
+        <button onclick="document.getElementById('verifyModal').style.display='none'"
+            style="background:none;border:none;color:#1f4fd8;cursor:pointer;">
+            Cancel
+        </button>
+    </div>
+</div>
+{% endif %}
+
+
+{% if lock_remaining %}
+<script>
+let seconds = {{ lock_remaining }};
+
+function formatTime(sec) {
+    let h = Math.floor(sec / 3600);
+    let m = Math.floor((sec % 3600) / 60);
+    let s = sec % 60;
+    return `${h}h ${m}m ${s}s`;
+}
+
+const timerEl = document.getElementById("lockTimer");
+timerEl.textContent = formatTime(seconds);
+
+const countdown = setInterval(() => {
+    seconds--;
+    timerEl.textContent = formatTime(seconds);
+
+    if (seconds <= 0) {
+        clearInterval(countdown);
+        location.reload(); // auto-enable login
+    }
+}, 1000);
+</script>
+{% endif %}
+
+{% if alert_message %}
+<script>
+    alert("{{ alert_message }}");
+</script>
+{% endif %}
+
+
+</body>
+</html>

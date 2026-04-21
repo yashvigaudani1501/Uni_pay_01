@@ -1,0 +1,32 @@
+[
+  {
+    "id": "BILL63028279F6",
+    "date": "2026-02-19 22:08:46",
+    "category": "DTH/Cable",
+    "provider": "Tata Power",
+    "customer_name": "Devansh",
+    "amount": 1172.0,
+    "bill_period": "Feb 2026",
+    "status": "success"
+  },
+  {
+    "id": "BILLA1BA8DE792",
+    "date": "2026-02-19 22:29:15",
+    "category": "Credit Card",
+    "provider": "ICICI Bank",
+    "customer_name": "Devansh",
+    "amount": 1479.0,
+    "bill_period": "Feb 2026",
+    "status": "success"
+  },
+  {
+    "id": "BILL70208940F1",
+    "date": "2026-02-20 10:04:46",
+    "category": "DTH/Cable",
+    "provider": "Tata Sky",
+    "customer_name": "qqqqqq",
+    "amount": 519.0,
+    "bill_period": "Feb 2026",
+    "status": "success"
+  }
+]

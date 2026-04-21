@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Recharge - UniPay</title>
+    
+    <!-- Bootstrap 5 CSS (Unit-6 from FSD-1) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Font Awesome for operator icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .recharge-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .recharge-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .operator-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .operator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .operator-card.selected {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .operator-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .jio-icon { color: #0056b3; }
+        .airtel-icon { color: #e60000; }
+        .vi-icon { color: #ff007f; }
+        .bsnl-icon { color: #008000; }
+        
+        .plan-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e1e5e9;
+            margin-bottom: 15px;
+        }
+        
+        .plan-card:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+        
+        .plan-card.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .plan-card.selected .text-muted {
+            color: rgba(255,255,255,0.8) !important;
+        }
+        
+        .history-table {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        .invalid-feedback {
+            display: block;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <div class="back-btn">
+        <a href="/home" class="btn btn-light shadow">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="recharge-container">
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-3"><i class="bi bi-wallet2"></i> Available Balance</h5>
+                    <div class="balance-amount">₹ {{ "%.2f"|format(balance) }}</div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <i class="bi bi-phone" style="font-size: 4rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recharge Form -->
+        <div class="recharge-form">
+            <h3 class="mb-4"><i class="bi bi-sim"></i> Mobile Recharge</h3>
+            
+            <!-- Tabs (Bootstrap Components - Unit-7 from FSD-1) -->
+            <ul class="nav nav-tabs mb-4" id="rechargeTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="quick-tab" data-bs-toggle="tab" data-bs-target="#quick" type="button" role="tab">
+                        Quick Recharge
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="plans-tab" data-bs-toggle="tab" data-bs-target="#plans" type="button" role="tab">
+                        Recharge Plans
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content" id="rechargeTabContent">
+                <!-- Quick Recharge Tab -->
+                <div class="tab-pane fade show active" id="quick" role="tabpanel">
+                    <form id="quickRechargeForm" novalidate>
+                        <!-- Mobile Number (Form Validation - Unit-7 from FSD-1) -->
+                        <div class="mb-3">
+                            <label for="mobileNumber" class="form-label">Mobile Number</label>
+                            <input type="tel" 
+                                   class="form-control form-control-lg" 
+                                   id="mobileNumber" 
+                                   placeholder="Enter 10-digit mobile number"
+                                   pattern="[6-9][0-9]{9}"
+                                   maxlength="10"
+                                   required>
+                            <div class="invalid-feedback" id="mobileError"></div>
+                            <small class="text-muted">Enter 10-digit Indian mobile number starting with 6,7,8,9</small>
+                        </div>
+                        
+                        <!-- Operator Selection with Font Awesome Icons -->
+                        <div class="mb-4">
+                            <label class="form-label">Select Operator</label>
+                            <div class="row g-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="operator-card" data-operator="Jio" onclick="selectOperator('Jio', this)">
+                                        <i class="fas fa-sim-card operator-icon jio-icon"></i>
+                                        <div class="fw-bold">Jio</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="operator-card" data-operator="Airtel" onclick="selectOperator('Airtel', this)">
+                                        <i class="fas fa-wifi operator-icon airtel-icon"></i>
+                                        <div class="fw-bold">Airtel</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="operator-card" data-operator="VI" onclick="selectOperator('VI', this)">
+                                        <i class="fas fa-broadcast-tower operator-icon vi-icon"></i>
+                                        <div class="fw-bold">VI</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="operator-card" data-operator="BSNL" onclick="selectOperator('BSNL', this)">
+                                        <i class="fas fa-globe operator-icon bsnl-icon"></i>
+                                        <div class="fw-bold">BSNL</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedOperator" required>
+                        </div>
+                        
+                        <!-- Amount Input -->
+                        <div class="mb-4">
+                            <label for="rechargeAmount" class="form-label">Recharge Amount (₹)</label>
+                            <input type="number" 
+                                   class="form-control form-control-lg" 
+                                   id="rechargeAmount" 
+                                   placeholder="Enter amount"
+                                   min="10"
+                                   step="1"
+                                   required>
+                        </div>
+                        
+                        <!-- Common Amounts (Bootstrap Buttons - Unit-6) -->
+                        <div class="mb-4">
+                            <label class="form-label">Quick Amounts</label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(10)">₹10</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(20)">₹20</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(50)">₹50</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(100)">₹100</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(200)">₹200</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(500)">₹500</button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100" id="rechargeBtn">
+                            <i class="bi bi-lightning-charge"></i> Proceed to Recharge
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Recharge Plans Tab -->
+                <div class="tab-pane fade" id="plans" role="tabpanel">
+                    <form id="planRechargeForm" novalidate>
+                        <!-- Mobile Number -->
+                        <div class="mb-3">
+                            <label for="planMobileNumber" class="form-label">Mobile Number</label>
+                            <input type="tel" 
+                                   class="form-control form-control-lg" 
+                                   id="planMobileNumber" 
+                                   placeholder="Enter 10-digit mobile number"
+                                   pattern="[6-9][0-9]{9}"
+                                   maxlength="10"
+                                   required>
+                            <div class="invalid-feedback" id="planMobileError"></div>
+                        </div>
+                        
+                        <!-- Plans by Operator (Accordion - Unit-6 from FSD-1) -->
+                        <div class="accordion mb-4" id="plansAccordion">
+                            {% for operator, plans in grouped_plans.items() %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse{{ loop.index }}">
+                                        <i class="fas fa-sim-card me-2"></i>
+                                        <strong>{{ operator }} Plans</strong>
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#plansAccordion">
+                                    <div class="accordion-body">
+                                        {% for plan in plans %}
+                                        <div class="card plan-card mb-2" onclick="selectPlan('{{ operator }}', {{ plan.amount }}, {{ plan.id }}, this)">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <h6 class="mb-1">₹{{ plan.amount }}</h6>
+                                                        <p class="mb-0 text-muted small">{{ plan.description }}</p>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="badge bg-success">{{ plan.validity }}</span>
+                                                        <div class="small text-muted">{{ plan.data_benefit }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <input type="hidden" id="selectedPlanOperator">
+                        <input type="hidden" id="selectedPlanAmount">
+                        <input type="hidden" id="selectedPlanId">
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100" id="planRechargeBtn">
+                            <i class="bi bi-lightning-charge"></i> Recharge with Selected Plan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recharge History (Bootstrap Table - Unit-6) -->
+        <div class="history-table">
+            <h4 class="mb-3"><i class="bi bi-clock-history"></i> Recent Recharges</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Mobile</th>
+                            <th>Operator</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Transaction ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for recharge in recharge_history %}
+                        <tr>
+                            <td>{{ recharge.date[:10] }}</td>
+                            <td>{{ recharge.mobile }}</td>
+                            <td>
+                                <i class="fas fa-sim-card me-1"></i>
+                                {{ recharge.operator }}
+                            </td>
+                            <td>₹{{ "%.2f"|format(recharge.amount) }}</td>
+                            <td><span class="badge bg-success">Success</span></td>
+                            <td><small class="text-muted">{{ recharge.id[:10] }}...</small></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No recharge history found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Current selected values
+        let selectedOperator = '';
+        let selectedPlanAmount = 0;
+        let selectedPlanId = null;
+        
+        // Select Operator (Event Handling - Unit-9 from FSD-1)
+        function selectOperator(operator, element) {
+            // Remove selected class from all operator cards
+            document.querySelectorAll('.operator-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked card
+            element.classList.add('selected');
+            
+            // Set selected operator
+            selectedOperator = operator;
+            document.getElementById('selectedOperator').value = operator;
+        }
+        
+        // Set amount from quick buttons
+        function setAmount(amount) {
+            document.getElementById('rechargeAmount').value = amount;
+        }
+        
+        // Select plan
+        function selectPlan(operator, amount, planId, element) {
+            // Remove selected class from all plan cards
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked card
+            element.classList.add('selected');
+            
+            // Set selected plan values
+            selectedPlanAmount = amount;
+            selectedPlanId = planId;
+            document.getElementById('selectedPlanOperator').value = operator;
+            document.getElementById('selectedPlanAmount').value = amount;
+            document.getElementById('selectedPlanId').value = planId;
+        }
+        
+        // Quick Recharge Form Submission (Promise & Fetch API - Unit-10 from FSD-1)
+        document.getElementById('quickRechargeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const mobile = document.getElementById('mobileNumber').value.trim();
+            const operator = selectedOperator;
+            const amount = parseFloat(document.getElementById('rechargeAmount').value);
+            
+            // Validation (Regex - Unit-10 from FSD-1)
+            const mobileRegex = /^[6-9][0-9]{9}$/;
+            
+            if (!mobileRegex.test(mobile)) {
+                document.getElementById('mobileError').textContent = 'Please enter a valid 10-digit mobile number starting with 6-9';
+                return;
+            }
+            
+            if (!operator) {
+                alert('Please select an operator');
+                return;
+            }
+            
+            if (!amount || amount < 10) {
+                alert('Please enter a valid amount (minimum ₹10)');
+                return;
+            }
+            
+            // Disable button and show loading
+            const btn = document.getElementById('rechargeBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Processing...';
+            btn.disabled = true;
+            
+            // Create promise for recharge (Unit-10 from FSD-1)
+            const rechargePromise = new Promise((resolve, reject) => {
+                fetch('/api/recharge', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mobile_number: mobile,
+                        operator: operator,
+                        amount: amount,
+                        plan_id: 'quick'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        resolve(data);
+                    } else {
+                        reject(data.message);
+                    }
+                })
+                .catch(error => reject(error));
+            });
+            
+            // Handle promise (Unit-10 from FSD-1)
+            rechargePromise
+                .then(data => {
+                    alert(`✅ Success!\nTransaction ID: ${data.transaction_id}`);
+                    // Reload after 1 second to show updated balance and history
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                })
+                .catch(error => {
+                    alert(`❌ Error: ${error}`);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+        });
+        
+        // Plan Recharge Form Submission
+        document.getElementById('planRechargeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mobile = document.getElementById('planMobileNumber').value.trim();
+            const operator = document.getElementById('selectedPlanOperator').value;
+            const amount = parseFloat(document.getElementById('selectedPlanAmount').value);
+            const planId = document.getElementById('selectedPlanId').value;
+            
+            // Validation
+            const mobileRegex = /^[6-9][0-9]{9}$/;
+            
+            if (!mobileRegex.test(mobile)) {
+                document.getElementById('planMobileError').textContent = 'Please enter a valid 10-digit mobile number';
+                return;
+            }
+            
+            if (!operator || !planId) {
+                alert('Please select a recharge plan');
+                return;
+            }
+            
+            // Disable button
+            const btn = document.getElementById('planRechargeBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Processing...';
+            btn.disabled = true;
+            
+            // Process recharge
+            fetch('/api/recharge', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    mobile_number: mobile,
+                    operator: operator,
+                    amount: amount,
+                    plan_id: planId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`✅ Recharge Successful!\nTransaction ID: ${data.transaction_id}`);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert(`❌ Error: ${data.message}`);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert(`❌ Error: ${error}`);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+        
+        // Real-time validation (Event Handling - Unit-9 from FSD-1)
+        document.getElementById('mobileNumber').addEventListener('input', function() {
+            const mobile = this.value;
+            const mobileRegex = /^[6-9][0-9]{9}$/;
+            
+            if (mobile.length === 10 && !mobileRegex.test(mobile)) {
+                document.getElementById('mobileError').textContent = 'Invalid mobile number format';
+            } else {
+                document.getElementById('mobileError').textContent = '';
+            }
+        });
+        
+        document.getElementById('planMobileNumber').addEventListener('input', function() {
+            const mobile = this.value;
+            const mobileRegex = /^[6-9][0-9]{9}$/;
+            
+            if (mobile.length === 10 && !mobileRegex.test(mobile)) {
+                document.getElementById('planMobileError').textContent = 'Invalid mobile number format';
+            } else {
+                document.getElementById('planMobileError').textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>

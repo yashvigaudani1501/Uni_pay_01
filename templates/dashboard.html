@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UniPay Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1d2671, #c33764);
+            color: #333;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(6px);
+        }
+
+        .navbar h2 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .logout-btn {
+            background: #fff;
+            color: #1d2671;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #eee;
+        }
+
+        /* ADMIN DROPDOWN */
+        .admin-actions {
+            position: relative;
+            margin-right: 15px;
+        }
+
+        .action-menu {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background: #ffffff;
+            min-width: 200px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .action-menu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 15px;
+            text-decoration: none;
+            font-size: 14px;
+            color: #1d2671;
+            font-weight: 500;
+        }
+
+        .action-menu a:hover {
+            background: #f3f3f3;
+        }
+
+        /* MAIN */
+        .container {
+            padding: 30px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #1d2671;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .card .value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .table-box {
+            margin-top: 40px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        table th {
+            background: #f4f4f4;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #eee;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>UniPay Admin</h2>
+
+    <div style="display:flex; align-items:center;">
+        <div class="admin-actions">
+            <button class="logout-btn" onclick="toggleAdminMenu()">Admin Powers ▾</button>
+            <div class="action-menu" id="adminMenu">
+                <a href="/admin/users">👥 Manage Users</a>
+                <a href="/admin/manage-admins">👮‍♂️ View/Add Admins</a>
+                <!--<a href="/admin/transactions">💳 View Transactions</a>-->
+                <a href="/admin/logs">📜 System Logs</a>
+                <!--<a href="/admin/settings">⚙ Settings</a>-->
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="cards">
+        <div class="card">
+            <h3>Total Users</h3>
+            <p>Registered users on UniPay</p>
+            <div class="value">{{ total_users }}</div>
+        </div>
+
+        <div class="card">
+            <h3>Total Transactions</h3>
+            <p>All-time transactions</p>
+            <div class="value" id="totalAllTime">₹ {{ total_amount }}</div>
+        </div>
+
+        <div class="card">
+            <h3>Today’s Transactions</h3>
+            <p>Transactions today</p>
+            <div class="value" id="totalToday">₹ {{ today_amount }}</div>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <h3>Recent Transactions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+    {% for txn in recent_transactions %}
+    <tr>
+        <td>{{ txn.id }}</td>
+        <td>{{ txn.type }}</td>
+        <td>₹ {{ "{:,.2f}".format(txn.amount) }}</td>
+        <td>
+            {{ txn.created_at.strftime('%d %b %Y') if txn.created_at else 'N/A' }}
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="5" style="text-align:center; color:#777;">
+            No recent transactions found
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+        </table>
+    </div>
+
+</div>
+
+<div class="footer">
+    UniPay Admin Panel • Authorized Access Only
+</div>
+
+<script>
+function toggleAdminMenu() {
+    const menu = document.getElementById("adminMenu");
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+}
+
+document.addEventListener("click", function(event) {
+    const menu = document.getElementById("adminMenu");
+    const button = event.target.closest(".admin-actions");
+
+    if (!button && menu.style.display === "block") {
+        menu.style.display = "none";
+    }
+});
+
+function confirmLogout() {
+    if (confirm("Are you sure you want to logout?")) {
+        window.location.href = "/logout";
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/admin/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the cards with real values
+                document.getElementById('totalAllTime').innerText = '₹ ' + data.all_time.toLocaleString();
+                document.getElementById('totalToday').innerText = '₹ ' + data.today.toLocaleString();
+            }
+        })
+        .catch(err => console.error('Error fetching admin stats:', err));
+});
+</script>
+
+</body>
+</html>

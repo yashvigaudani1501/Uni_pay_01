@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UniPay Dashboard</title>
+
+<style>
+:root{
+    --primary:#667eea;
+    --secondary:#764ba2;
+    --dark-bg:#0f172a;
+    --dark-card:#1e293b;
+    --card-bg:#ffffff;
+    --border:#e1e5e9;
+    --text:#2d3748;
+    --text-light:#718096;
+    --shadow:0 4px 6px rgba(0,0,0,0.1);
+    --hover-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--dark-bg);
+    min-height:100vh;
+    color:white;
+    position:relative;
+    overflow-x:hidden;
+}
+
+/* Animated Background */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.1;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(66, 153, 225, 0.1) 0%, transparent 50%);
+    animation: float 20s infinite ease-in-out;
+}
+
+.currency-pattern {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="10" y="50" font-family="Arial" font-size="12" fill="rgba(255,255,255,0.03)" font-weight="bold">₹</text><text x="30" y="70" font-family="Arial" font-size="10" fill="rgba(255,255,255,0.02)">$</text><text x="60" y="30" font-family="Arial" font-size="8" fill="rgba(255,255,255,0.02)">€</text><text x="80" y="80" font-family="Arial" font-size="14" fill="rgba(255,255,255,0.03)" font-weight="bold">¥</text></svg>');
+    opacity: 0.3;
+    animation: movePattern 30s linear infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes movePattern {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(100px, 100px); }
+}
+
+.container{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:280px;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+    padding:30px 25px;
+    color:white;
+    position:relative;
+    z-index:10;
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background: linear-gradient(45deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+    pointer-events:none;
+    z-index:-1;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    font-size:24px;
+    font-weight:800;
+    margin-bottom:40px;
+    position:relative;
+    z-index:1;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-icon::before {
+    content: 'UP';
+    color: white;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.logo-icon::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+}
+
+.logo-text {
+    background: linear-gradient(45deg, #ffffff, #e2e8f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px 20px;
+    margin-bottom:8px;
+    border-radius:12px;
+    color:rgba(255, 255, 255, 0.8);
+    text-decoration:none;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    position:relative;
+    z-index:1;
+    font-weight:500;
+    border: 1px solid transparent;
+}
+
+.menu a:hover{
+    background: linear-gradient(45deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15));
+    border-color: rgba(102, 126, 234, 0.3);
+    transform:translateX(8px);
+    color: white;
+    box-shadow:0 4px 20px rgba(102,126,234,0.2);
+}
+
+.menu a.active{
+    background: linear-gradient(45deg, rgba(102,126,234,0.25), rgba(118,75,162,0.25));
+    border-color: rgba(102, 126, 234, 0.4);
+    color:white;
+    box-shadow:0 4px 20px rgba(102,126,234,0.3);
+    font-weight: 600;
+}
+
+.download-icon {
+    font-size:14px;
+    opacity:0.8;
+    cursor:pointer;
+    transition: all 0.3s ease;
+}
+
+.download-icon:hover {
+    opacity:1;
+    transform: scale(1.2);
+}
+
+/* MAIN */
+.main{
+    flex:1;
+    padding:40px;
+    background: transparent;
+    position: relative;
+    overflow-y: auto;
+}
+
+.section{
+    display:none;
+    animation:fadeIn 0.5s ease-in-out;
+}
+
+.section.active{
+    display:block;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+.card{
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+    padding:30px;
+    border-radius:20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom:30px;
+    box-shadow:var(--shadow);
+    transition:all 0.4s ease;
+    position:relative;
+    overflow:hidden;
+    backdrop-filter: blur(10px);
+}
+
+.card::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:4px;
+    background:linear-gradient(90deg, #667eea, #764ba2);
+    z-index: 1;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover{
+    box-shadow:0 15px 35px rgba(0,0,0,0.3);
+    transform:translateY(-5px);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.card:hover::after {
+    opacity: 1;
+}
+
+.card h3{
+    margin-top:0;
+    color:white;
+    font-weight:600;
+    margin-bottom:20px;
+    font-size: 22px;
+}
+
+/* DASHBOARD OPTIONS */
+.dashboard-options {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:25px;
+    margin-bottom:40px;
+}
+
+.option-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.2);
+    cursor:pointer;
+    transition:all 0.4s ease;
+    position:relative;
+    overflow:hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.option-card::before {
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:4px;
+    background:linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.option-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.option-card:hover::after {
+    left: 100%;
+}
+
+.option-card:hover {
+    transform:translateY(-8px);
+    box-shadow:0 20px 40px rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.option-icon {
+    width:60px;
+    height:60px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:28px;
+    margin-bottom:20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.option-title {
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:10px;
+    color:white;
+}
+
+.option-desc {
+    color:rgba(255, 255, 255, 0.7);
+    font-size:14px;
+    line-height:1.5;
+}
+
+/* FINANCIAL OVERVIEW */
+.financial-overview {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:25px;
+    margin-top:20px;
+}
+
+.financial-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.2);
+    transition:all 0.4s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.financial-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 15px 35px rgba(0,0,0,0.3);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.financial-card h3 {
+    font-size:16px;
+    font-weight:500;
+    margin-bottom:15px;
+    color:rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.financial-amount {
+    font-size:2.8rem;
+    font-weight:700;
+    background:linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin:10px 0;
+    letter-spacing: 0.5px;
+}
+
+.financial-trend {
+    font-size:14px;
+    color:rgba(255, 255, 255, 0.7);
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.financial-trend.positive {
+    color:#48bb78;
+}
+
+.financial-trend.negative {
+    color:#e53e3e;
+}
+
+/* PROGRESS SECTION */
+.progress-cards {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+    gap:25px;
+    margin-top:20px;
+}
+
+.progress-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.2);
+    transition:all 0.4s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.progress-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 15px 35px rgba(0,0,0,0.3);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.progress-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.progress-header h4 {
+    margin:0;
+    font-size:18px;
+    font-weight:600;
+    color:white;
+}
+
+.progress-value {
+    font-size:24px;
+    font-weight:700;
+    color:#667eea;
+}
+
+.progress-bar-container {
+    height:12px;
+    background:rgba(255, 255, 255, 0.1);
+    border-radius:20px;
+    overflow:hidden;
+    margin:15px 0;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.progress-fill {
+    height:100%;
+    border-radius:20px;
+    transition:width 1s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.progress-fill.savings {
+    background: linear-gradient(90deg, #48bb78, #38a169);
+}
+
+.progress-fill.loan {
+    background: linear-gradient(90deg, #ed8936, #dd6b20);
+}
+
+.progress-fill.investment {
+    background: linear-gradient(90deg, #9f7aea, #805ad5);
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-info {
+    display:flex;
+    justify-content:space-between;
+    font-size:14px;
+    color:rgba(255, 255, 255, 0.7);
+    margin-top:10px;
+}
+
+/* MONTHLY SPENDING */
+.monthly-spending {
+    margin-top:30px;
+}
+
+.spending-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.spending-stats {
+    display:flex;
+    justify-content:space-between;
+    margin-top:20px;
+}
+
+.spending-stat {
+    text-align:center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.spending-stat:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateY(-3px);
+}
+
+.spending-stat-value {
+    font-size:24px;
+    font-weight:700;
+    color:#667eea;
+}
+
+.spending-stat-label {
+    font-size:14px;
+    color:rgba(255, 255, 255, 0.7);
+    margin-top:5px;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    background:linear-gradient(45deg, #667eea, #764ba2);
+    color:white;
+    font-weight:600;
+    padding:18px;
+    text-align:left;
+    border-radius:12px 12px 0 0;
+    border: none;
+}
+
+td{
+    padding:18px;
+    border-bottom:1px solid rgba(255, 255, 255, 0.1);
+    transition:background 0.2s ease;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+tr:hover td{
+    background:rgba(102, 126, 234, 0.1);
+}
+
+/* TRANSACTION BUTTONS */
+.transaction-buttons{
+    display:flex;
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.graph-btn{
+    padding:14px 28px;
+    border:none;
+    border-radius:25px;
+    background:rgba(255, 255, 255, 0.1);
+    color:rgba(255, 255, 255, 0.8);
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-size:14px;
+    border: 1px solid transparent;
+}
+
+.graph-btn:hover{
+    background:rgba(102, 126, 234, 0.2);
+    transform:translateY(-2px);
+    box-shadow:0 4px 15px rgba(102,126,234,0.2);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.graph-btn.active{
+    background:linear-gradient(45deg, #667eea, #764ba2);
+    color:white;
+    box-shadow:0 4px 20px rgba(102,126,234,0.4);
+    border: none;
+}
+
+/* PROFILE AVATAR */
+.profile-info {
+    display:flex;
+    align-items:center;
+    gap:25px;
+}
+
+.avatar {
+    width:100px;
+    height:100px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:36px;
+    font-weight:bold;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: rotate(45deg);
+}
+
+/* MODAL STYLES */
+.modal-overlay {
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,0.7);
+    z-index:1000;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border-radius:24px;
+    padding:40px;
+    max-width:500px;
+    width:100%;
+    max-height:90vh;
+    overflow-y:auto;
+    box-shadow:0 25px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    backdrop-filter: blur(20px);
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 24px 24px 0 0;
+}
+
+.modal-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.modal-title {
+    font-size:28px;
+    font-weight:700;
+    color:white;
+    margin:0;
+}
+
+.close-btn {
+    background:none;
+    border:none;
+    font-size:28px;
+    cursor:pointer;
+    color:rgba(255, 255, 255, 0.7);
+    transition:color 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.close-btn:hover {
+    color:white;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+    margin-bottom:30px;
+}
+
+.form-group {
+    margin-bottom:25px;
+}
+
+.form-group label {
+    display:block;
+    margin-bottom:12px;
+    font-weight:500;
+    color:rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width:100%;
+    padding:16px 20px;
+    border:1px solid rgba(255, 255, 255, 0.2);
+    border-radius:12px;
+    font-size:16px;
+    transition:all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline:none;
+    border-color:#667eea;
+    box-shadow:0 0 0 4px rgba(102,126,234,0.2);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.form-group input::placeholder,
+.form-group select::placeholder,
+.form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.modal-footer {
+    display:flex;
+    justify-content:flex-end;
+    gap:15px;
+}
+
+.btn {
+    padding:16px 32px;
+    border:none;
+    border-radius:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+}
+
+.btn-secondary {
+    background:rgba(255, 255, 255, 0.1);
+    color:rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+    background:rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background:linear-gradient(45deg, #667eea, #764ba2);
+    color:white;
+    border: none;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(102,126,234,0.4);
+}
+
+/* RESPONSIVE */
+@media (max-width:768px){
+    .container{
+        flex-direction:column;
+    }
+    .sidebar{
+        width:100%;
+        padding:20px;
+    }
+    .main{
+        padding:20px;
+    }
+    .dashboard-options {
+        grid-template-columns:1fr;
+    }
+    .financial-overview {
+        grid-template-columns:1fr;
+    }
+    .transaction-buttons{
+        flex-direction:column;
+        gap:10px;
+    }
+    .progress-cards {
+        grid-template-columns:1fr;
+    }
+    .spending-stats {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .spending-stat {
+        flex: 1 1 calc(50% - 15px);
+    }
+}
+</style>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="background-animation">
+    <div class="currency-pattern"></div>
+</div>
+
+<div class="container">
+
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"></div>
+        <div class="logo-text">UniPay</div>
+    </div>
+
+    <nav class="menu">
+        <a class="active" onclick="showSection('dashboard',this)"><span>Dashboard</span></a>
+        <a onclick="showSection('activities',this)"><span>Activities</span></a>
+        <a onclick="showSection('progress',this)"><span>Progress</span></a>
+        <a onclick="showSection('transactions',this)">
+            <span>Transactions</span>
+            <span class="download-icon" onclick="downloadPDF(event)">📥</span>
+        </a>
+        <a onclick="showSection('profile',this)"><span>Profile</span></a>
+        <a onclick="logout()"><span>Logout</span></a>
+    </nav>
+</aside>
+
+<main class="main">
+
+<div id="dashboard" class="section active">
+    <h1>Dashboard</h1>
+    
+    <div class="dashboard-options">
+        <div class="option-card" onclick="showCheckBalance()">
+            <div class="option-icon" style="background:linear-gradient(135deg, #667eea, #764ba2);">₹</div>
+            <div class="option-title">Check Balance</div>
+            <div class="option-desc">View your current account balance and transaction history</div>
+        </div>
+        
+        <div class="option-card" onclick="showMoneyTransfer()">
+            <div class="option-icon" style="background:linear-gradient(135deg, #48bb78, #38a169);">⇄</div>
+            <div class="option-title">Money Transfer</div>
+            <div class="option-desc">Send money instantly to bank accounts, UPI, or contacts</div>
+        </div>
+        
+        <div class="option-card" onclick="showLoan()">
+            <div class="option-icon" style="background:linear-gradient(135deg, #ed8936, #dd6b20);">💰</div>
+            <div class="option-title">Apply for Loan</div>
+            <div class="option-desc">Quick loans with instant approval and competitive rates</div>
+        </div>
+        
+        <div class="option-card" onclick="showFundDeposit()">
+            <div class="option-icon" style="background:linear-gradient(135deg, #9f7aea, #805ad5);">📥</div>
+            <div class="option-title">Fund Deposit</div>
+            <div class="option-desc">Add money to your account using various payment methods</div>
+        </div>
+    </div>
+    
+    <div class="financial-overview">
+        <div class="financial-card">
+            <h3>Total Balance</h3>
+            <div class="financial-amount">₹ 25,450</div>
+            <div class="financial-trend positive"><span>+₹1,200 this week</span></div>
+        </div>
+        
+        <div class="financial-card">
+            <h3>Total Credit</h3>
+            <div class="financial-amount">₹ 18,200</div>
+            <div class="financial-trend positive"><span>+15% from last month</span></div>
+        </div>
+        
+        <div class="financial-card">
+            <h3>Total Debit</h3>
+            <div class="financial-amount">₹ 7,250</div>
+            <div class="financial-trend negative"><span>-8% from last month</span></div>
+        </div>
+        
+        <div class="financial-card">
+            <h3>Monthly Savings</h3>
+            <div class="financial-amount">₹ 3,450</div>
+            <div class="financial-trend positive"><span>+22% target achieved</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="activities" class="section">
+    <h1>Activities</h1>
+    <div class="card">
+        <h3>Credit / Debit Activity</h3>
+        <canvas id="activityChart" width="750" height="300"></canvas>
+        <p><span style="color:#48bb78;">● Credit</span>&nbsp;&nbsp;<span style="color:#e53e3e;">● Debit</span></p>
+    </div>
+</div>
+
+<div id="progress" class="section">
+    <h1>Progress</h1>
+    
+    <div class="card">
+        <h3>Financial Goals Progress</h3>
+        <p style="color:rgba(255, 255, 255, 0.7); margin-bottom:25px;">Track your financial goals and achievements</p>
+        
+        <div class="progress-cards">
+            <div class="progress-card">
+                <div class="progress-header">
+                    <h4>Emergency Fund</h4>
+                    <div class="progress-value">75%</div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-fill savings" style="width:75%;"></div>
+                </div>
+                <div class="progress-info">
+                    <span>₹75,000 / ₹1,00,000</span>
+                    <span>Target: Jun 2024</span>
+                </div>
+            </div>
+            
+            <div class="progress-card">
+                <div class="progress-header">
+                    <h4>Home Loan Repayment</h4>
+                    <div class="progress-value">58%</div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-fill loan" style="width:58%;"></div>
+                </div>
+                <div class="progress-info">
+                    <span>₹5.8L / ₹10L</span>
+                    <span>24 months remaining</span>
+                </div>
+            </div>
+            
+            <div class="progress-card">
+                <div class="progress-header">
+                    <h4>Retirement Fund</h4>
+                    <div class="progress-value">42%</div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-fill investment" style="width:42%;"></div>
+                </div>
+                <div class="progress-info">
+                    <span>₹4.2L / ₹10L</span>
+                    <span>Target: Dec 2025</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="spending-header">
+            <h3 style="margin:0;">Monthly Spending Limit</h3>
+            <div style="font-size:24px; font-weight:700; color:#667eea;">70%</div>
+        </div>
+        
+        <div class="progress-bar-container" style="height:16px;">
+            <div class="progress-fill" style="width:70%; background:linear-gradient(90deg, #667eea, #764ba2);"></div>
+        </div>
+        
+        <div class="spending-stats">
+            <div class="spending-stat">
+                <div class="spending-stat-value">₹14,000</div>
+                <div class="spending-stat-label">Spent</div>
+            </div>
+            <div class="spending-stat">
+                <div class="spending-stat-value">₹6,000</div>
+                <div class="spending-stat-label">Remaining</div>
+            </div>
+            <div class="spending-stat">
+                <div class="spending-stat-value">12</div>
+                <div class="spending-stat-label">Days Left</div>
+            </div>
+            <div class="spending-stat">
+                <div class="spending-stat-value">₹20,000</div>
+                <div class="spending-stat-label">Monthly Limit</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="transactions" class="section">
+    <h1>Transactions</h1>
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="margin:0;">Transaction Graphs</h3>
+            <button onclick="downloadTransactionPDF()" class="btn btn-primary" style="padding:10px 20px; font-size:14px;">📥 Download PDF</button>
+        </div>
+        <div class="transaction-buttons">
+            <button id="credit-btn" class="graph-btn active">Credit Graph</button>
+            <button id="debit-btn" class="graph-btn">Debit Graph</button>
+            <button id="all-btn" class="graph-btn">All Transactions</button>
+        </div>
+        <canvas id="transactionChart" width="750" height="300"></canvas>
+        <p id="graph-legend"><span style="color:#667eea;">● Credit Transactions</span></p>
+    </div>
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="margin:0;">Recent Transactions</h3>
+            <button onclick="downloadStatement()" class="btn btn-secondary" style="padding:10px 20px; font-size:14px;">📄 Full Statement</button>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>12 Jan 2024</td><td style="color:#48bb78; font-weight:600;">Credit</td><td>Salary Deposit</td><td>₹25,000</td><td style="color:#48bb78;">✓ Completed</td></tr>
+                <tr><td>15 Jan 2024</td><td style="color:#e53e3e; font-weight:600;">Debit</td><td>Electricity Bill</td><td>₹2,500</td><td style="color:#48bb78;">✓ Completed</td></tr>
+                <tr><td>18 Jan 2024</td><td style="color:#48bb78; font-weight:600;">Credit</td><td>Freelance Payment</td><td>₹8,000</td><td style="color:#48bb78;">✓ Completed</td></tr>
+                <tr><td>20 Jan 2024</td><td style="color:#e53e3e; font-weight:600;">Debit</td><td>Online Shopping</td><td>₹4,200</td><td style="color:#48bb78;">✓ Completed</td></tr>
+                <tr><td>22 Jan 2024</td><td style="color:#48bb78; font-weight:600;">Credit</td><td>Investment Returns</td><td>₹1,200</td><td style="color:#48bb78;">✓ Completed</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="profile" class="section">
+    <h1>Profile</h1>
+    <div class="card">
+        <h3>User Profile</h3>
+        <div class="profile-info">
+            <div class="avatar">B</div>
+            <div style="flex:1;">
+                <h4 style="margin:0 0 10px 0; color:white;">Blackbox</h4>
+                <p style="margin:5px 0; color:rgba(255, 255, 255, 0.8);"><strong>Email:</strong> blackbox@example.com</p>
+                <p style="margin:5px 0; color:rgba(255, 255, 255, 0.8);"><strong>Phone:</strong> +91 1234567890</p>
+                <p style="margin:5px 0; color:rgba(255, 255, 255, 0.8);"><strong>Account No:</strong> UNIPAY20240001</p>
+                <p style="margin:5px 0; color:rgba(255, 255, 255, 0.8);"><strong>Member Since:</strong> January 2023</p>
+                <div style="margin-top:20px;">
+                    <button class="btn btn-primary" onclick="editProfile()">Edit Profile</button>
+                    <button class="btn btn-secondary" style="margin-left:10px;">Security Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+<div id="checkBalanceModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Account Balance</h3>
+            <button class="close-btn" onclick="closeCheckBalance()">×</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align:center; padding:20px;">
+                <div style="font-size:56px; color:#667eea; margin:20px 0; font-weight:800; text-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);">₹ 25,450</div>
+                <p style="font-size:18px; color:rgba(255, 255, 255, 0.9); margin-bottom: 30px;">Available Balance</p>
+                <div style="background:rgba(255, 255, 255, 0.05); padding:20px; border-radius:12px; margin-top:20px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <span style="color:rgba(255, 255, 255, 0.8);">Ledger Balance:</span><span style="font-weight:700; color:white;">₹ 26,200</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:rgba(255, 255, 255, 0.8);">Uncleared Funds:</span><span style="font-weight:700; color:white;">₹ 750</span>
+                    </div>
+                </div>
+                <p style="color:rgba(255, 255, 255, 0.6); font-size:14px; margin-top:25px;">Last updated: Just now</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeCheckBalance()">Close</button>
+            <button class="btn btn-primary" onclick="downloadStatement()">Download Statement</button>
+        </div>
+    </div>
+</div>
+
+<div id="moneyTransferModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Money Transfer</h3>
+            <button class="close-btn" onclick="closeMoneyTransfer()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="transferType">Transfer Type</label>
+                <select id="transferType" onchange="updateTransferFields()">
+                    <option value="bank">Bank Transfer</option>
+                    <option value="upi">UPI Transfer</option>
+                    <option value="mobile">Mobile Number</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label id="recipientLabel">Recipient Account Number</label>
+                <input type="text" id="recipientDetails" placeholder="Enter account number">
+            </div>
+            
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="transferAmount" placeholder="Enter amount" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label>Remarks</label>
+                <input type="text" id="transferRemarks" placeholder="Add a note (optional)">
+            </div>
+            
+            <div style="background:rgba(255, 255, 255, 0.05); padding:20px; border-radius:12px; margin-top:20px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <span style="color:rgba(255, 255, 255, 0.8);">Available Balance:</span><span style="font-weight:700; color:white;">₹ 25,450</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <span style="color:rgba(255, 255, 255, 0.8);">Transfer Fee:</span><span style="font-weight:700; color:#48bb78;">₹ 0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-weight:700;">
+                    <span style="color:rgba(255, 255, 255, 0.8);">Balance After Transfer:</span><span id="balanceAfter" style="color:white;">₹ 25,450</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeMoneyTransfer()">Cancel</button>
+            <button class="btn btn-primary" onclick="processTransfer()">Transfer Now</button>
+        </div>
+    </div>
+</div>
+
+<div id="loanModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Apply for Loan</h3>
+            <button class="close-btn" onclick="closeLoan()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="loanType">Loan Type</label>
+                <select id="loanType">
+                    <option value="personal">Personal Loan</option>
+                    <option value="home">Home Loan</option>
+                    <option value="car">Car Loan</option>
+                    <option value="education">Education Loan</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Loan Amount (₹)</label>
+                <input type="number" id="loanAmount" placeholder="Enter amount" min="1000" max="5000000">
+            </div>
+            
+            <div class="form-group">
+                <label>Tenure (Months)</label>
+                <select id="loanTenure">
+                    <option value="12">12 Months</option>
+                    <option value="24">24 Months</option>
+                    <option value="36">36 Months</option>
+                    <option value="48">48 Months</option>
+                    <option value="60">60 Months</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Monthly Income (₹)</label>
+                <input type="number" id="monthlyIncome" placeholder="Enter your monthly income">
+            </div>
+            
+            <div style="background:rgba(255, 255, 255, 0.05); padding:20px; border-radius:12px; margin-top:20px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <h4 style="margin:0 0 15px 0; color:white;">Loan Details</h4>
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <span style="color:rgba(255, 255, 255, 0.8);">Interest Rate:</span><span style="font-weight:700; color:#667eea;" id="interestRate">10.5%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                    <span style="color:rgba(255, 255, 255, 0.8);">EMI (approx):</span><span style="font-weight:700; color:#667eea;" id="emiAmount">₹ 0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:rgba(255, 255, 255, 0.8);">Processing Fee:</span><span style="font-weight:700; color:#e53e3e;">1% of loan amount</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeLoan()">Cancel</button>
+            <button class="btn btn-primary" onclick="applyLoan()">Apply Now</button>
+        </div>
+    </div>
+</div>
+
+<div id="fundDepositModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Fund Deposit</h3>
+            <button class="close-btn" onclick="closeFundDeposit()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="depositMethod">Deposit Method</label>
+                <select id="depositMethod" onchange="updateDepositInstructions()">
+                    <option value="bank">Bank Transfer</option>
+                    <option value="card">Credit/Debit Card</option>
+                    <option value="upi">UPI</option>
+                    <option value="cash">Cash Deposit</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" id="depositAmount" placeholder="Enter amount" min="100">
+            </div>
+            
+            <div class="form-group">
+                <label>Reference/Transaction ID</label>
+                <input type="text" id="depositRef" placeholder="Enter reference (optional)">
+            </div>
+            
+            <div style="background:rgba(255, 255, 255, 0.05); padding:20px; border-radius:12px; margin-top:20px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <h4 style="margin:0 0 15px 0; color:white;">Deposit Instructions</h4>
+                <div style="font-size:14px; color:rgba(255, 255, 255, 0.7);">
+                    <p id="bankDetails" style="margin:8px 0; line-height:1.6;"><strong style="color:white;">Bank Transfer Details:</strong><br>
+                    Account Name: UniPay Blackbox<br>
+                    Account No: 1234567890<br>
+                    IFSC: UNIP0001234<br>
+                    Bank: UniPay Bank</p>
+                    <p id="cardNote" style="margin:8px 0; display:none;">You will be redirected to secure payment gateway for card payment.</p>
+                    <p id="upiNote" style="margin:8px 0; display:none;">UPI ID: blackbox@unipay</p>
+                    <p id="cashNote" style="margin:8px 0; display:none;">Visit nearest UniPay branch for cash deposit.</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeFundDeposit()">Cancel</button>
+            <button class="btn btn-primary" onclick="processDeposit()">Proceed to Deposit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function showSection(id,el){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.menu a').forEach(a=>a.classList.remove('active'));
+    el.classList.add('active');
+    
+    if(id==='activities'||id==='transactions'){
+        setTimeout(()=>{
+            if(id==='activities')drawActivityGraph();
+            else if(id==='transactions')drawTransactionGraph(currentGraph);
+        },100);
+    }
+}
+
+function logout(){
+    if(confirm('Are you sure you want to logout?')){
+        alert('Logged out successfully!');
+    }
+}
+
+function downloadPDF(event){
+    event.stopPropagation();
+    showSection('transactions',document.querySelector('.menu a:nth-child(4)'));
+    setTimeout(()=>{
+        downloadTransactionPDF();
+    },100);
+}
+
+function drawActivityGraph(){
+    const canvas=document.getElementById("activityChart");
+    if(!canvas)return;
+    const ctx=canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const credit=[1200,1800,1500,2200,2000];
+    const debit=[800,900,700,1200,1000];
+    const labels=["Jan","Feb","Mar","Apr","May"];
+    const pad=50;
+    const maxY=2500;
+    
+    // Draw grid
+    ctx.strokeStyle="rgba(255, 255, 255, 0.1)";
+    ctx.lineWidth=1;
+    for(let i=0;i<=5;i++){
+        let y=canvas.height-pad-(i*40);
+        ctx.beginPath();
+        ctx.moveTo(pad,y);
+        ctx.lineTo(canvas.width-pad,y);
+        ctx.stroke();
+    }
+    
+    // Draw axes
+    ctx.strokeStyle="rgba(255, 255, 255, 0.3)";
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(pad,pad);
+    ctx.lineTo(pad,canvas.height-pad);
+    ctx.lineTo(canvas.width-pad,canvas.height-pad);
+    ctx.stroke();
+    
+    // Y labels
+    ctx.fillStyle="rgba(255, 255, 255, 0.7)";
+    ctx.font="12px Inter";
+    for(let i=0;i<=5;i++){
+        let y=canvas.height-pad-(i*40);
+        ctx.fillText((i*500).toLocaleString(),10,y+4);
+    }
+    
+    // X labels
+    labels.forEach((l,i)=>{
+        let x=pad+i*130;
+        ctx.fillText(l,x-5,canvas.height-20);
+    });
+    
+    // Draw credit line with gradient
+    const creditGradient=ctx.createLinearGradient(0,0,canvas.width,0);
+    creditGradient.addColorStop(0,"rgba(72, 187, 120, 0.8)");
+    creditGradient.addColorStop(1,"rgba(56, 161, 105, 0.8)");
+    ctx.strokeStyle=creditGradient;
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    credit.forEach((v,i)=>{
+        let x=pad+i*130;
+        let y=canvas.height-pad-(v/maxY)*200;
+        if(i===0)ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    
+    // Draw debit line with gradient
+    const debitGradient=ctx.createLinearGradient(0,0,canvas.width,0);
+    debitGradient.addColorStop(0,"rgba(229, 62, 62, 0.8)");
+    debitGradient.addColorStop(1,"rgba(220, 38, 38, 0.8)");
+    ctx.strokeStyle=debitGradient;
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    debit.forEach((v,i)=>{
+        let x=pad+i*130;
+        let y=canvas.height-pad-(v/maxY)*200;
+        if(i===0)ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+}
+
+let currentGraph='credit';
+const creditData=[1200,1800,1500,2200,2000,1900,2100];
+const debitData=[800,900,700,1200,1000,1100,950];
+const transactionLabels=["Jan","Feb","Mar","Apr","May","Jun","Jul"];
+
+function drawTransactionGraph(type){
+    const transactionCanvas=document.getElementById("transactionChart");
+    if(!transactionCanvas)return;
+    const transactionCtx=transactionCanvas.getContext("2d");
+    transactionCtx.clearRect(0,0,transactionCanvas.width,transactionCanvas.height);
+    const data=type==='credit'?creditData:type==='debit'?debitData:creditData.map((val,idx)=>val+debitData[idx]);
+    const color=type==='credit'?'#667eea':type==='debit'?'#e53e3e':'#9f7aea';
+    const title=type==='credit'?'Credit Transactions':type==='debit'?'Debit Transactions':'All Transactions';
+    const pad=50;
+    const maxY=Math.max(...data)*1.2;
+    
+    // Draw grid
+    transactionCtx.strokeStyle="rgba(255, 255, 255, 0.1)";
+    transactionCtx.lineWidth=1;
+    for(let i=0;i<=5;i++){
+        let y=transactionCanvas.height-pad-(i*(transactionCanvas.height-2*pad)/5);
+        transactionCtx.beginPath();
+        transactionCtx.moveTo(pad,y);
+        transactionCtx.lineTo(transactionCanvas.width-pad,y);
+        transactionCtx.stroke();
+    }
+    
+    // Draw axes
+    transactionCtx.strokeStyle="rgba(255, 255, 255, 0.3)";
+    transactionCtx.lineWidth=2;
+    transactionCtx.beginPath();
+    transactionCtx.moveTo(pad,pad);
+    transactionCtx.lineTo(pad,transactionCanvas.height-pad);
+    transactionCtx.lineTo(transactionCanvas.width-pad,transactionCanvas.height-pad);
+    transactionCtx.stroke();
+    
+    // Y labels
+    transactionCtx.fillStyle="rgba(255, 255, 255, 0.7)";
+    transactionCtx.font="12px Inter";
+    for(let i=0;i<=5;i++){
+        let y=transactionCanvas.height-pad-(i*(transactionCanvas.height-2*pad)/5);
+        let value=Math.round((maxY/5)*i);
+        transactionCtx.fillText(value.toLocaleString(),10,y+4);
+    }
+    
+    // X labels
+    transactionLabels.forEach((label,i)=>{
+        let x=pad+i*((transactionCanvas.width-2*pad)/(transactionLabels.length-1));
+        transactionCtx.fillText(label,x-5,transactionCanvas.height-20);
+    });
+    
+    // Draw line with gradient
+    const gradient=transactionCtx.createLinearGradient(0,0,transactionCanvas.width,0);
+    if(type==='credit'){
+        gradient.addColorStop(0,"rgba(102, 126, 234, 0.8)");
+        gradient.addColorStop(1,"rgba(118, 75, 162, 0.8)");
+    }else if(type==='debit'){
+        gradient.addColorStop(0,"rgba(229, 62, 62, 0.8)");
+        gradient.addColorStop(1,"rgba(220, 38, 38, 0.8)");
+    }else{
+        gradient.addColorStop(0,"rgba(159, 122, 234, 0.8)");
+        gradient.addColorStop(1,"rgba(128, 90, 213, 0.8)");
+    }
+    transactionCtx.strokeStyle=gradient;
+    transactionCtx.lineWidth=4;
+    transactionCtx.beginPath();
+    data.forEach((value,i)=>{
+        let x=pad+i*((transactionCanvas.width-2*pad)/(data.length-1));
+        let y=transactionCanvas.height-pad-(value/maxY)*(transactionCanvas.height-2*pad);
+        if(i===0)transactionCtx.moveTo(x,y);
+        else transactionCtx.lineTo(x,y);
+    });
+    transactionCtx.stroke();
+    
+    document.getElementById('graph-legend').innerHTML=`<span style="color:${color};">● ${title}</span>`;
+}
+
+window.addEventListener('load',function(){
+    drawActivityGraph();
+    drawTransactionGraph('credit');
+    document.getElementById('credit-btn').addEventListener('click',function(){
+        currentGraph='credit';
+        document.querySelectorAll('.graph-btn').forEach(btn=>btn.classList.remove('active'));
+        this.classList.add('active');
+        drawTransactionGraph('credit');
+    });
+    document.getElementById('debit-btn').addEventListener('click',function(){
+        currentGraph='debit';
+        document.querySelectorAll('.graph-btn').forEach(btn=>btn.classList.remove('active'));
+        this.classList.add('active');
+        drawTransactionGraph('debit');
+    });
+    document.getElementById('all-btn')?.addEventListener('click',function(){
+        currentGraph='all';
+        document.querySelectorAll('.graph-btn').forEach(btn=>btn.classList.remove('active'));
+        this.classList.add('active');
+        drawTransactionGraph('all');
+    });
+});
+
+function showCheckBalance(){document.getElementById('checkBalanceModal').style.display='flex';}
+function closeCheckBalance(){document.getElementById('checkBalanceModal').style.display='none';}
+function downloadStatement(){alert('Statement download initiated! PDF will be generated.');closeCheckBalance();}
+function downloadTransactionPDF(){alert('Transaction PDF download started! This would normally generate a PDF file.');}
+
+function showMoneyTransfer(){
+    document.getElementById('moneyTransferModal').style.display='flex';
+    updateTransferFields();
+}
+function closeMoneyTransfer(){
+    document.getElementById('moneyTransferModal').style.display='none';
+    document.getElementById('recipientDetails').value='';
+    document.getElementById('transferAmount').value='';
+    document.getElementById('transferRemarks').value='';
+    document.getElementById('balanceAfter').textContent='₹ 25,450';
+}
+function updateTransferFields(){
+    const transferType=document.getElementById('transferType').value;
+    const recipientLabel=document.getElementById('recipientLabel');
+    const recipientInput=document.getElementById('recipientDetails');
+    switch(transferType){
+        case'bank':recipientLabel.textContent='Recipient Account Number';recipientInput.placeholder='Enter account number';break;
+        case'upi':recipientLabel.textContent='UPI ID';recipientInput.placeholder='Enter UPI ID';break;
+        case'mobile':recipientLabel.textContent='Mobile Number';recipientInput.placeholder='Enter mobile number';break;
+    }
+    const amount=document.getElementById('transferAmount').value||0;
+    const balanceAfter=25450-amount;
+    document.getElementById('balanceAfter').textContent=`₹ ${balanceAfter.toLocaleString()}`;
+}
+document.getElementById('transferAmount')?.addEventListener('input',function(){updateTransferFields();});
+function processTransfer(){
+    const account=document.getElementById('recipientDetails').value;
+    const amount=document.getElementById('transferAmount').value;
+    const remarks=document.getElementById('transferRemarks').value;
+    const type=document.getElementById('transferType').value;
+    if(!account||!amount){alert('Please fill in all required fields');return;}
+    if(confirm(`Transfer ₹${amount} to ${account}?`)){
+        alert(`Transfer successful! ₹${amount} has been sent.`);
+        closeMoneyTransfer();
+    }
+}
+
+function showLoan(){
+    document.getElementById('loanModal').style.display='flex';
+    calculateEMI();
+}
+function closeLoan(){document.getElementById('loanModal').style.display='none';}
+function calculateEMI(){
+    const amount=document.getElementById('loanAmount').value||0;
+    const tenure=document.getElementById('loanTenure').value||12;
+    const interestRate=10.5;
+    if(amount>0){
+        const monthlyRate=interestRate/12/100;
+        const emi=amount*monthlyRate*Math.pow(1+monthlyRate,tenure)/(Math.pow(1+monthlyRate,tenure)-1);
+        document.getElementById('emiAmount').textContent=`₹ ${Math.round(emi).toLocaleString()}`;
+    }
+}
+document.getElementById('loanAmount')?.addEventListener('input',calculateEMI);
+document.getElementById('loanTenure')?.addEventListener('change',calculateEMI);
+function applyLoan(){
+    const type=document.getElementById('loanType').value;
+    const amount=document.getElementById('loanAmount').value;
+    const tenure=document.getElementById('loanTenure').value;
+    const income=document.getElementById('monthlyIncome').value;
+    if(!amount||!income){alert('Please fill in all required fields');return;}
+    const loanTypes={'personal':'Personal Loan','home':'Home Loan','car':'Car Loan','education':'Education Loan'};
+    if(confirm(`Apply for ${loanTypes[type]} of ₹${amount} for ${tenure} months?`)){
+        alert('Loan application submitted successfully! You will hear back within 24 hours.');
+        closeLoan();
+    }
+}
+
+function showFundDeposit(){
+    document.getElementById('fundDepositModal').style.display='flex';
+    updateDepositInstructions();
+}
+function closeFundDeposit(){document.getElementById('fundDepositModal').style.display='none';}
+function updateDepositInstructions(){
+    const method=document.getElementById('depositMethod').value;
+    document.getElementById('bankDetails').style.display='none';
+    document.getElementById('cardNote').style.display='none';
+    document.getElementById('upiNote').style.display='none';
+    document.getElementById('cashNote').style.display='none';
+    switch(method){
+        case'bank':document.getElementById('bankDetails').style.display='block';break;
+        case'card':document.getElementById('cardNote').style.display='block';break;
+        case'upi':document.getElementById('upiNote').style.display='block';break;
+        case'cash':document.getElementById('cashNote').style.display='block';break;
+    }
+}
+function processDeposit(){
+    const method=document.getElementById('depositMethod').value;
+    const amount=document.getElementById('depositAmount').value;
+    const reference=document.getElementById('depositRef').value;
+    if(!amount){alert('Please enter deposit amount');return;}
+    const methods={'bank':'Bank Transfer','card':'Credit/Debit Card','upi':'UPI','cash':'Cash Deposit'};
+    if(confirm(`Deposit ₹${amount} via ${methods[method]}?`)){
+        alert(`Deposit request submitted! ₹${amount} will be credited within 2 hours.`);
+        closeFundDeposit();
+    }
+}
+
+function editProfile(){alert('Edit profile functionality would open here in a real application.');}
+
+document.addEventListener('click',function(event){
+    const modals=['checkBalanceModal','moneyTransferModal','loanModal','fundDepositModal'];
+    modals.forEach(modalId=>{
+        const modal=document.getElementById(modalId);
+        if(modal&&modal.style.display==='flex'){
+            if(event.target===modal){
+                switch(modalId){
+                    case'checkBalanceModal':closeCheckBalance();break;
+                    case'moneyTransferModal':closeMoneyTransfer();break;
+                    case'loanModal':closeLoan();break;
+                    case'fundDepositModal':closeFundDeposit();break;
+                }
+            }
+        }
+    });
+});
+
+document.addEventListener('keydown',function(event){
+    if(event.key==='Escape'){
+        closeCheckBalance();
+        closeMoneyTransfer();
+        closeLoan();
+        closeFundDeposit();
+    }
+});
+</script>
+
+</body>
+</html>
